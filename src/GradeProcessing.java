@@ -15,9 +15,6 @@ import javafx.stage.Stage;
 import java.sql.*;
 
 
-/**
- *
- */
 public class GradeProcessing extends Application {
     // Initialise buttons and textfields
     private TextField StudentID = new TextField();
