@@ -3,7 +3,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -13,11 +12,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 
+import java.sql.*;
 
 
 /**
@@ -28,20 +24,17 @@ public class GradeProcessing extends Application {
     private TextField StudentID = new TextField();
     private TextField StudentName = new TextField();
     private TextField QuizMarks = new TextField();
-    private TextField Weight = new TextField();
     private TextField Ass1Marks = new TextField();
     private TextField Ass2Marks = new TextField();
     private TextField Ass3Marks = new TextField();
     private TextField ExamMarks = new TextField();
     private TextField Marks = new TextField();
     private TextField Grade = new TextField();
-    private TextField WeightedMarks = new TextField();
-    private TextField AverageMarks = new TextField();
     private TextField TableName = new TextField();
     private Button btCreateTable = new Button("Create Table");
-    private Button btStudentMarks = new Button("Student Marks");
-    private Button btAverageMarks = new Button("Average Marks");
     private Button btInsertRecord = new Button("Insert Record");
+    private Button btUpdateRecord = new Button("Update Record");
+    private Button btSearchRecord = new Button("Search Record");
 
     // JDBC driver name and database URL
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
@@ -53,8 +46,7 @@ public class GradeProcessing extends Application {
 
     // Create data structure to hold student objects
     ObservableList<Student> data =
-            FXCollections.observableArrayList(new Student("11111111", "X", 100, 80, 100, 90, 90),
-                    new Student("22222222", "Y", 100, 60, 80, 80, 80));
+            FXCollections.observableArrayList();
 
     @Override // Override the start method in the Application class
     public void start(Stage primaryStage) {
@@ -64,7 +56,7 @@ public class GradeProcessing extends Application {
         // Place nodes in the pane
         pane.setTop(gridPane());
         pane.setCenter(tableView());
-        pane.setBottom(hBox());
+        //pane.setBottom(hBox());
 
         // Create a scene and place it in the stage
         Scene scene = new Scene(pane);
@@ -84,6 +76,7 @@ public class GradeProcessing extends Application {
         gridPane.add(btCreateTable, 2, 0);
         gridPane.add(new Label("Student ID *must be 8 digits"), 0, 1);
         gridPane.add(StudentID, 1, 1);
+        gridPane.add(btSearchRecord, 2, 1);
         gridPane.add(new Label("Student Name"), 0, 2);
         gridPane.add(StudentName, 1, 2);
         gridPane.add(new Label("Quiz Marks (enter 0-100)"), 0, 3);
@@ -97,6 +90,7 @@ public class GradeProcessing extends Application {
         gridPane.add(new Label("Exam Marks (enter 0-100)"), 0, 7);
         gridPane.add(ExamMarks, 1, 7);
         gridPane.add(btInsertRecord, 2, 7);
+        gridPane.add(btUpdateRecord, 3, 7);
 
 
         // Set properties for UI
@@ -105,13 +99,50 @@ public class GradeProcessing extends Application {
         StudentID.setAlignment(Pos.BOTTOM_RIGHT);
         StudentName.setAlignment(Pos.BOTTOM_RIGHT);
         Marks.setAlignment(Pos.BOTTOM_RIGHT);
-        Weight.setAlignment(Pos.BOTTOM_RIGHT);
         Grade.setAlignment(Pos.BOTTOM_RIGHT);
         QuizMarks.setAlignment(Pos.BOTTOM_RIGHT);
         Ass1Marks.setAlignment(Pos.BOTTOM_RIGHT);
         Ass2Marks.setAlignment(Pos.BOTTOM_RIGHT);
+        Ass3Marks.setAlignment(Pos.BOTTOM_RIGHT);
         ExamMarks.setAlignment(Pos.BOTTOM_RIGHT);
-        WeightedMarks.setAlignment(Pos.BOTTOM_RIGHT);
+
+        // Process events
+        btCreateTable.setOnAction(e -> {
+            try {
+                createTable();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            } catch (ClassNotFoundException e1) {
+                e1.printStackTrace();
+            }
+        });
+        btInsertRecord.setOnAction(e -> {
+            try {
+                insertRecord();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            } catch (ClassNotFoundException e1) {
+                e1.printStackTrace();
+            }
+        });
+        btUpdateRecord.setOnAction(e -> {
+            try {
+                updateRecord();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            } catch (ClassNotFoundException e1) {
+                e1.printStackTrace();
+            }
+        });
+        btSearchRecord.setOnAction(e -> {
+            try {
+                searchRecord();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            } catch (ClassNotFoundException e1) {
+                e1.printStackTrace();
+            }
+        });
 
         return gridPane;
     }
@@ -120,7 +151,7 @@ public class GradeProcessing extends Application {
         // Create UI
         TableView<Student> tableView = new TableView<>();
         // Set width of table
-        tableView.setMaxWidth(552);
+        tableView.setMaxWidth(750);
 
         // Add columns and populate with variables from Student objects
         TableColumn IDColumn = new TableColumn("ID");
@@ -136,19 +167,19 @@ public class GradeProcessing extends Application {
         QuizMarkColumn.setCellValueFactory(new PropertyValueFactory<Student, Integer>("quizMarks"));
 
         TableColumn Ass1Column = new TableColumn("A1");
-        Ass1Column.setMinWidth(50);
+        Ass1Column.setMinWidth(30);
         Ass1Column.setCellValueFactory(new PropertyValueFactory<Student, Integer>("ass1Marks"));
 
         TableColumn Ass2Column = new TableColumn("A2");
-        Ass2Column.setMinWidth(50);
+        Ass2Column.setMinWidth(30);
         Ass2Column.setCellValueFactory(new PropertyValueFactory<Student, Integer>("ass2Marks"));
 
         TableColumn Ass3Column = new TableColumn("A3");
-        Ass2Column.setMinWidth(50);
-        Ass2Column.setCellValueFactory(new PropertyValueFactory<Student, Integer>("ass3Marks"));
+        Ass3Column.setMinWidth(30);
+        Ass3Column.setCellValueFactory(new PropertyValueFactory<Student, Integer>("ass3Marks"));
 
         TableColumn ExamColumn = new TableColumn("Exam");
-        ExamColumn.setMinWidth(50);
+        ExamColumn.setMinWidth(30);
         ExamColumn.setCellValueFactory(new PropertyValueFactory<Student, Integer>("examMarks"));
 
         TableColumn ResultsColumn = new TableColumn("Results");
@@ -169,47 +200,18 @@ public class GradeProcessing extends Application {
         return tableView;
     }
 
-    private HBox hBox() {
+    //private HBox hBox() {
 
         // Create hbox object
-        HBox hbox = new HBox(5); // spacing = 5
-
-        // Add elements to hbox
-        hbox.getChildren().addAll(new Label("Average Marks:"), AverageMarks, btAverageMarks, btStudentMarks);
+    //    HBox hbox = new HBox(5); // spacing = 5
 
         //Set properties for UI
-        hbox.setAlignment(Pos.CENTER);
-        hbox.setPadding(new Insets(10, 0, 10, 0));
-        GridPane.setHalignment(btStudentMarks, HPos.RIGHT);
-        // Make Average Marks text box greyed out and uneditable
-        AverageMarks.setEditable(false);
-        AverageMarks.setDisable(true);
-        AverageMarks.setMaxWidth(50);
+    //    hbox.setAlignment(Pos.CENTER);
+    //    hbox.setPadding(new Insets(10, 0, 10, 0));
 
-        // Process events
-        btStudentMarks.setOnAction(e -> studentMarks());
-        //btAverageMarks.setOnAction(e -> averageMarks());
-        btCreateTable.setOnAction(e -> {
-            try {
-                createTable();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            } catch (ClassNotFoundException e1) {
-                e1.printStackTrace();
-            }
-        });
-        btInsertRecord.setOnAction(e -> {
-            try {
-                insertRecord();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            } catch (ClassNotFoundException e1) {
-                e1.printStackTrace();
-            }
-        });
 
-        return hbox;
-    }
+    //    return hbox;
+    //}
 
     public static class Student {
         // Declare variables
@@ -220,12 +222,13 @@ public class GradeProcessing extends Application {
         private final SimpleIntegerProperty ass2Marks;
         private final SimpleIntegerProperty ass3Marks;
         private final SimpleIntegerProperty examMarks;
-        private final double results;
-        private final String grade;
+        private final SimpleIntegerProperty results;
+        private final SimpleStringProperty grade;
 
         // Student constructor
-        private Student(String studentID, String name,
-                        int quizMarks, int ass1Marks, int ass2Marks, int ass3Marks, int examMarks) {
+        public Student(String studentID, String name,
+                        int quizMarks, int ass1Marks, int ass2Marks, int ass3Marks, int examMarks, int results,
+                        String grade) {
             // Initialise variables using the arguments passed to the method
             this.studentID = new SimpleStringProperty(studentID);
             this.studentName = new SimpleStringProperty(name);
@@ -234,11 +237,9 @@ public class GradeProcessing extends Application {
             this.ass2Marks = new SimpleIntegerProperty(ass2Marks);
             this.ass3Marks = new SimpleIntegerProperty(ass3Marks);
             this.examMarks = new SimpleIntegerProperty(examMarks);
-            // Calculate results
-            this.results = (quizMarks* 0.05) + (ass1Marks * 0.15) + (ass2Marks * 0.2) + (ass3Marks * 0.1)
-                    + (examMarks * 0.5);
-            // Call the calculateGrade method and pass results variable
-            this.grade = calculateGrade(results);
+            this.results = new SimpleIntegerProperty(results);
+            this.grade = new SimpleStringProperty(grade);
+
         }
 
         // Public getters for object variables
@@ -264,12 +265,13 @@ public class GradeProcessing extends Application {
             return examMarks.get();
         }
         public double getResults() {
-            return this.results;
+            return results.get();
         }
         public String getGrade() {
-            return this.grade;
+            return grade.get();
         }
     }
+
 
     private void createTable() throws SQLException, ClassNotFoundException {
         Connection conn = null;
@@ -321,7 +323,7 @@ public class GradeProcessing extends Application {
         }
     }
 
-    private void updateTable() throws SQLException, ClassNotFoundException {
+    private void updateRecord() throws SQLException, ClassNotFoundException {
         Connection conn = null;
         Statement stmt = null;
         String tableName = TableName.getText();
@@ -430,21 +432,82 @@ public class GradeProcessing extends Application {
         }
     }
 
-    // Method to create a new student object and add to the list
-    public void studentMarks() {
-        // Declare and initialise variables
-        String ID = StudentID.getText();
-        String name = StudentName.getText();
-        int quizMarks = Integer.parseInt(QuizMarks.getText());
-        int ass1Marks = Integer.parseInt(Ass1Marks.getText());
-        int ass2Marks = Integer.parseInt(Ass2Marks.getText());
-        int ass3Marks = Integer.parseInt(Ass3Marks.getText());
-        int examMarks = Integer.parseInt(ExamMarks.getText());
-        // Create new student object by passing variables to constructor
-        Student student = new Student(ID, name, quizMarks, ass1Marks, ass2Marks, ass3Marks, examMarks);
-        // Add the student object to the data list
-        data.add(student);
+    private void searchRecord() throws SQLException, ClassNotFoundException {
+        Connection conn = null;
+        Statement stmt = null;
+        String tableName = TableName.getText();
+        String studentID = StudentID.getText();
+        int quizMarks = 0;
+        int ass1Marks = 0;
+        int ass2Marks = 0;
+        int ass3Marks = 0;
+        int examMarks = 0;
+        int results = 0;
+        String grade = null;
+        String studentName = null;
+
+        String sql = "SELECT * FROM " + tableName +
+                " WHERE STUDENTID = '" +
+                studentID + "'";
+
+        try {
+            // Register JDBC driver
+            Class.forName("com.mysql.jdbc.Driver");
+
+            // Open a connection
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+            // Create statement
+            stmt = conn.createStatement();
+
+            // Execute statement
+            ResultSet resultSet = stmt.executeQuery(sql);
+
+            while (resultSet.next()) {
+                studentID = resultSet.getString(1);
+                studentName = resultSet.getString(2);
+                quizMarks = Integer.parseInt(resultSet.getString(3));
+                ass1Marks = Integer.parseInt(resultSet.getString(4));
+                ass2Marks = Integer.parseInt(resultSet.getString(5));
+                ass3Marks = Integer.parseInt(resultSet.getString(6));
+                examMarks = Integer.parseInt(resultSet.getString(7));
+                results = Integer.parseInt(resultSet.getString(8));
+                grade = resultSet.getString(9);
+
+                //System.out.println(studentID + studentName + quizMarks + ass1Marks + ass2Marks + ass3Marks +
+                // examMarks
+                //        + results + grade);
+
+
+            }
+            // Create new student object by passing variables to constructor
+            Student student = new Student(studentID, studentName, quizMarks, ass1Marks, ass2Marks, ass3Marks,
+                    examMarks, results, grade);
+
+            // Add the student object to the data list
+            data.add(student);
+        }catch(SQLException se){
+            //Handle errors for JDBC
+            se.printStackTrace();
+        }catch(Exception e){
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        }finally{
+            //finally block used to close resources
+            try{
+                if(stmt!=null)
+                    conn.close();
+            }catch(SQLException se){
+            }// do nothing
+            try{
+                if(conn!=null)
+                    conn.close();
+            }catch(SQLException se){
+                se.printStackTrace();
+            }
+        }
     }
+
 
     // Method to calculate the grade of a student
     public static String calculateGrade(double results) {
