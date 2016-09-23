@@ -10,7 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.sql.*;
@@ -22,15 +21,17 @@ import java.sql.*;
 public class GradeProcessing extends Application {
     // Initialise buttons and textfields
     private TextField StudentID = new TextField();
+    private TextField SearchStudentID = new TextField();
     private TextField StudentName = new TextField();
     private TextField QuizMarks = new TextField();
     private TextField Ass1Marks = new TextField();
     private TextField Ass2Marks = new TextField();
     private TextField Ass3Marks = new TextField();
     private TextField ExamMarks = new TextField();
-    private TextField Marks = new TextField();
     private TextField Grade = new TextField();
     private TextField TableName = new TextField();
+    private TextField NewTableName = new TextField();
+    private TextField SearchTableName = new TextField();
     private Button btCreateTable = new Button("Create Table");
     private Button btInsertRecord = new Button("Insert Record");
     private Button btUpdateRecord = new Button("Update Record");
@@ -56,7 +57,6 @@ public class GradeProcessing extends Application {
         // Place nodes in the pane
         pane.setTop(gridPane());
         pane.setCenter(tableView());
-        //pane.setBottom(hBox());
 
         // Create a scene and place it in the stage
         Scene scene = new Scene(pane);
@@ -70,41 +70,61 @@ public class GradeProcessing extends Application {
         GridPane gridPane = new GridPane();
         gridPane.setHgap(5);
         gridPane.setVgap(5);
+
         // Add labels and textboxes
-        gridPane.add(new Label("New table name: "), 0, 0);
-        gridPane.add(TableName, 1, 0);
-        gridPane.add(btCreateTable, 2, 0);
-        gridPane.add(new Label("Student ID *must be 8 digits"), 0, 1);
-        gridPane.add(StudentID, 1, 1);
-        gridPane.add(btSearchRecord, 2, 1);
-        gridPane.add(new Label("Student Name"), 0, 2);
-        gridPane.add(StudentName, 1, 2);
-        gridPane.add(new Label("Quiz Marks (enter 0-100)"), 0, 3);
-        gridPane.add(QuizMarks, 1, 3);
-        gridPane.add(new Label("Assignment 1 Marks (enter 0-100)"), 0, 4);
-        gridPane.add(Ass1Marks, 1, 4);
-        gridPane.add(new Label("Assignment 2 Marks (enter 0-100)"), 0, 5);
-        gridPane.add(Ass2Marks, 1, 5);
-        gridPane.add(new Label("Assignment 3 Marks (enter 0-100)"), 0, 6);
-        gridPane.add(Ass3Marks, 1, 6);
-        gridPane.add(new Label("Exam Marks (enter 0-100)"), 0, 7);
-        gridPane.add(ExamMarks, 1, 7);
-        gridPane.add(btInsertRecord, 2, 7);
-        gridPane.add(btUpdateRecord, 3, 7);
+        // New Table section
+        gridPane.add(new Label("Create new Table"), 0, 0);
+        gridPane.add(new Label("New table name: "), 0, 1);
+        gridPane.add(NewTableName, 1, 1);
+        gridPane.add(btCreateTable, 2, 1);
+
+        // Insert/Update section
+        gridPane.add(new Label(""), 0, 2);
+        gridPane.add(new Label("Insert/Update Record"), 0, 3);
+        gridPane.add(new Label("Table Name"), 0, 4);
+        gridPane.add(TableName, 1, 4);
+        gridPane.add(new Label("Student ID"), 0, 5);
+        gridPane.add(StudentID, 1, 5);
+        gridPane.add(new Label("Student Name"), 0, 6);
+        gridPane.add(StudentName, 1, 6);
+        gridPane.add(new Label("Quiz Marks (enter 0-100)"), 0, 7);
+        gridPane.add(QuizMarks, 1, 7);
+        gridPane.add(new Label("Assignment 1 Marks (enter 0-100)"), 2, 4);
+        gridPane.add(Ass1Marks, 3, 4);
+        gridPane.add(new Label("Assignment 2 Marks (enter 0-100)"), 2, 5);
+        gridPane.add(Ass2Marks, 3, 5);
+        gridPane.add(new Label("Assignment 3 Marks (enter 0-100)"), 2, 6);
+        gridPane.add(Ass3Marks, 3, 6);
+        gridPane.add(new Label("Exam Marks (enter 0-100)"), 2, 7);
+        gridPane.add(ExamMarks, 3, 7);
+        gridPane.add(btInsertRecord, 1, 8);
+        gridPane.add(btUpdateRecord, 2, 8);
+
+        // Search section
+        gridPane.add(new Label(""), 0, 9);
+        gridPane.add(new Label("Search for Student"), 0, 10);
+        gridPane.add(new Label("Enter Table name:"), 0, 11);
+        gridPane.add(SearchTableName, 1, 11);
+        gridPane.add(new Label("Enter Student ID:"), 0, 12);
+        gridPane.add(SearchStudentID, 1, 12);
+        gridPane.add(btSearchRecord, 2, 12);
 
 
         // Set properties for UI
         gridPane.setAlignment(Pos.CENTER);
         gridPane.setPadding(new Insets(10, 0, 10, 0));
+        TableName.setAlignment(Pos.BOTTOM_RIGHT);
+        NewTableName.setAlignment(Pos.BOTTOM_RIGHT);
         StudentID.setAlignment(Pos.BOTTOM_RIGHT);
         StudentName.setAlignment(Pos.BOTTOM_RIGHT);
-        Marks.setAlignment(Pos.BOTTOM_RIGHT);
         Grade.setAlignment(Pos.BOTTOM_RIGHT);
         QuizMarks.setAlignment(Pos.BOTTOM_RIGHT);
         Ass1Marks.setAlignment(Pos.BOTTOM_RIGHT);
         Ass2Marks.setAlignment(Pos.BOTTOM_RIGHT);
         Ass3Marks.setAlignment(Pos.BOTTOM_RIGHT);
         ExamMarks.setAlignment(Pos.BOTTOM_RIGHT);
+        SearchStudentID.setAlignment(Pos.BOTTOM_RIGHT);
+        SearchTableName.setAlignment(Pos.BOTTOM_RIGHT);
 
         // Process events
         btCreateTable.setOnAction(e -> {
@@ -200,18 +220,6 @@ public class GradeProcessing extends Application {
         return tableView;
     }
 
-    //private HBox hBox() {
-
-        // Create hbox object
-    //    HBox hbox = new HBox(5); // spacing = 5
-
-        //Set properties for UI
-    //    hbox.setAlignment(Pos.CENTER);
-    //    hbox.setPadding(new Insets(10, 0, 10, 0));
-
-
-    //    return hbox;
-    //}
 
     public static class Student {
         // Declare variables
@@ -272,11 +280,10 @@ public class GradeProcessing extends Application {
         }
     }
 
-
     private void createTable() throws SQLException, ClassNotFoundException {
         Connection conn = null;
         Statement stmt = null;
-        String tableName = TableName.getText();
+        String tableName = NewTableName.getText();
         String sql = "CREATE TABLE " + tableName +
                 " (STUDENTID INTEGER not NULL, " +
                 " STUDENTNAME VARCHAR(255), " +
@@ -327,17 +334,28 @@ public class GradeProcessing extends Application {
         Connection conn = null;
         Statement stmt = null;
         String tableName = TableName.getText();
-        String sql = "CREATE TABLE " + tableName +
-                " (STUDENTID INTEGER not NULL, " +
-                " STUDENTNAME VARCHAR(255), " +
-                " QUIZ INTEGER, " +
-                " ASS1 INTEGER, " +
-                " ASS2 INTEGER, " +
-                " ASS3 INTEGER, " +
-                " EXAM INTEGER, " +
-                " RESULTS INTEGER, " +
-                " GRADE VARCHAR(5), " +
-                " PRIMARY KEY ( STUDENTID ))";
+        String ID = StudentID.getText();
+        String name = StudentName.getText();
+        int quizMarks = Integer.parseInt(QuizMarks.getText());
+        int ass1Marks = Integer.parseInt(Ass1Marks.getText());
+        int ass2Marks = Integer.parseInt(Ass2Marks.getText());
+        int ass3Marks = Integer.parseInt(Ass3Marks.getText());
+        int examMarks = Integer.parseInt(ExamMarks.getText());
+        int results = (int) ((quizMarks* 0.05) + (ass1Marks * 0.15) + (ass2Marks * 0.2) + (ass3Marks * 0.1)
+                + (examMarks * 0.5));
+        String grade = calculateGrade(results);
+
+        String sql = "UPDATE " + tableName +
+                " SET STUDENTNAME='" + name +
+                "', QUIZ = " + quizMarks +
+                ", ASS1 = " + ass1Marks +
+                ", ASS2 = " + ass2Marks +
+                ", ASS3 = " + ass3Marks +
+                ", EXAM = " + examMarks +
+                ", RESULTS = " + results +
+                ", GRADE = '" + grade +
+                "' WHERE STUDENTID = " + ID;
+
         try {
             // Register JDBC driver
             Class.forName("com.mysql.jdbc.Driver");
@@ -377,6 +395,8 @@ public class GradeProcessing extends Application {
         Connection conn = null;
         Statement stmt = null;
         String tableName = TableName.getText();
+        String ID = StudentID.getText();
+        String name = StudentName.getText();
         int quizMarks = Integer.parseInt(QuizMarks.getText());
         int ass1Marks = Integer.parseInt(Ass1Marks.getText());
         int ass2Marks = Integer.parseInt(Ass2Marks.getText());
@@ -388,8 +408,8 @@ public class GradeProcessing extends Application {
 
         String sql = "INSERT INTO " + tableName +
                 " VALUES ('" +
-                StudentID.getText() +"', '" +
-                StudentName.getText() +"', '" +
+                ID +"', '" +
+                name +"', '" +
                 quizMarks +"', '" +
                 ass1Marks +"', '" +
                 ass2Marks +"', '" +
@@ -435,8 +455,8 @@ public class GradeProcessing extends Application {
     private void searchRecord() throws SQLException, ClassNotFoundException {
         Connection conn = null;
         Statement stmt = null;
-        String tableName = TableName.getText();
-        String studentID = StudentID.getText();
+        String tableName = SearchTableName.getText();
+        String studentID = SearchStudentID.getText();
         int quizMarks = 0;
         int ass1Marks = 0;
         int ass2Marks = 0;
@@ -508,7 +528,6 @@ public class GradeProcessing extends Application {
         }
     }
 
-
     // Method to calculate the grade of a student
     public static String calculateGrade(double results) {
         // Declare grade variable
@@ -544,8 +563,8 @@ public class GradeProcessing extends Application {
         return grade;
     }
 
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
 
+    public static void main(String[] args)  {
         launch(args);
 
 
