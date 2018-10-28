@@ -1,6 +1,6 @@
 # Grade Processing
 
-This program consists of several functions used to interact with a MySQL database, including creating tables, inserting records, updating records, and searching for records.
+This program consists of a GUI created using JavaFX to interact with a MySQL database, allowing creation of tables, inserting and updating records, and searching for records.
 
 ### Main Screen
 The main screen consists of three separate functional areas – Create new Table, Insert/Update Record, and Search for Student. At the bottom of the screen, there is a table to show the student details that have been searched.
